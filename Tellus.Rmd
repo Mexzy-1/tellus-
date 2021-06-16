@@ -1,0 +1,81 @@
+---
+title: "AE 02"
+subtitle: "Flint Water Crisis"
+date: "Due: August 21, 11:59PM"
+author: "YOUR NAME GOES HERE"
+output: 
+  html_document: 
+    toc: TRUE
+    toc_float: TRUE
+    fig_height: 4
+    fig_width: 9
+---
+
+## Introduction
+
+The data set consists homes sampled with three water lead contaminant values at
+designated time points. The lead content is in parts per billion (ppb). 
+Additionally, some location data is given about each home.
+
+First, let's load in the `tidyverse` with the following code:
+
+```{r load-packages, warning = FALSE, message=FALSE}
+library(tidyverse)
+library(shiny)
+library(rvest)
+```
+
+To get started, read in the `flint.csv` file using the function `read_csv`. Note
+that this function is part of the `tidyverse`, which you must load *before*
+attempting to use the function (if it's not loaded, the function won't work!).
+
+```{r flint, warning = FALSE, message = FALSE}
+demo <- read_csv("Tellus-Boost-FB-UA-2021-Demo-Feb-9-2021-to-Apr-19-2021.csv")
+geo <- read_csv("Tellus-Boost-FB-UA-2021-Geo-Feb-9-2021-to-Apr-19-2021.csv")
+imp <- read_csv("Tellus-Boost-FB-UA-2021-Imp-Device-Feb-9-2021-to-Apr-19-2021.csv")
+```
+
+
+Let's preview the data with the `glimpse()` function:
+
+```{r glimpse-data, echo = TRUE}
+glimpse(demo)
+glimpse(geo)
+glimpse(imp)
+view(demo)
+
+```
+```{R demo-project}
+
+alt_demo <- demo %>% group_by(`Ad Name`)%>%mutate( total = sum(`Amount Spent (USD)`)) 
+alt_demo <- alt_demo %>% group_by(`Ad Name`)%>%mutate(objcount = (sum(`Unique Link Clicks`+ `Unique Landing Page Views`, na.rm = T)))%>% mutate(Effectiveness = objcount/total)
+short <- alt_demo %>% select(`Ad Name`, Effectiveness)
+
+v <- short %>% distinct()%>% arrange(desc(Effectiveness))%>%filter(!is.na(Effectiveness))
+
+ggplot(v, mapping = aes(x =`Ad Name`, y= Effectiveness))+ geom_bar(stat="identity", xlab="Ad Name",
+        ylab="Effectiveness")
+
+```
+
+
+```{r geo-project}
+altgeo <- geo %>% group_by(`DMA Region`)%>%mutate(objcount = (sum(`Unique Link Clicks`+ `Unique Landing Page Views`, na.rm = T)))%>%mutate(test = sum(Impressions))%>% mutate(effective_regions = objcount/test)
+
+
+v1 <- altgeo %>%filter(effective_regions >= 0)%>%arrange(desc(effective_regions))
+short1 <- v1 %>% select(`DMA Region`,effective_regions)%>% distinct()
+ggplot(short1, mapping = aes(x =`DMA Region`, y= effective_regions))+ geom_bar(stat="identity", xlab="Region",
+        ylab="Effectiveness")
+#add code later to look by average rent of the locations.
+#possible map of the locations by the number of people 
+
+```
+
+```{r demo}
+
+altimp<- imp %>% group_by(`Impression Device`,Platform,Placement)%>%mutate(Impressionsc = sum(`App Installs`,na.rm =T)/sum(Impressions,na.rm =T)*sum(`Amount Spent (USD)`))
+
+summary<- altimp %>% select(`Impression Device`,Platform,Placement,Impressionsc)%>%distinct()%>%arrange(Impressionsc)%>%filter(Impressionsc !=0)
+
+```
