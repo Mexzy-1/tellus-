@@ -1,8 +1,5 @@
 ---
-title: "AE 02"
-subtitle: "Flint Water Crisis"
-date: "Due: August 21, 11:59PM"
-author: "YOUR NAME GOES HERE"
+
 output: 
   html_document: 
     toc: TRUE
